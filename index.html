@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TracebackCTF - Challenge</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0a0a0a; color: #00ff41; font-family: 'Courier New', monospace; min-height: 100vh; }
+  .screen { display: none; padding: 20px; max-width: 800px; margin: 0 auto; }
+  .screen.active { display: block; }
+  h1 { color: #ff0000; text-shadow: 0 0 10px #ff0000; margin-bottom: 20px; font-size: 1.4em; }
+  .terminal { background: #111; border: 1px solid #00ff41; padding: 15px; border-radius: 4px; margin: 10px 0; }
+  input[type=text], input[type=number] { background: #000; border: 1px solid #00ff41; color: #00ff41;
+    padding: 8px 12px; font-family: monospace; font-size: 1em; width: 220px; }
+  button { background: #000; border: 1px solid #ff0000; color: #ff0000; padding: 8px 18px;
+    font-family: monospace; cursor: pointer; margin: 5px; font-size: 1em; }
+  button:hover { background: #1a0000; }
+  .score { color: #ffff00; font-size: 1.2em; margin: 10px 0; }
+  .question { color: #00ffff; margin: 10px 0; font-size: 1.1em; }
+  .hint-box { background: #0a0a1a; border: 1px solid #444; padding: 10px; margin: 10px 0; color: #888; font-size: 0.85em; }
+  .flag-display { color: #ff0000; font-size: 1.2em; word-break: break-all; margin: 10px 0; letter-spacing: 1px; }
+  .blink { animation: blink 1s step-end infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  .noise { color: #333; font-size: 0.7em; line-height: 1.4; }
+  .progress-bar { background: #111; border: 1px solid #00ff41; height: 20px; margin: 10px 0; }
+  .progress-fill { background: #00ff41; height: 100%; transition: width 0.3s; }
+  #scan-output { color: #00ff41; font-size: 0.8em; line-height: 1.6; white-space: pre; }
+  .red { color: #ff0000; } .yellow { color: #ffff00; } .cyan { color: #00ffff; }
+  .ok { color: #00ff41; } .err { color: #ff0000; }
+</style>
+</head>
+<body>
+
+<!-- LEVEL 1 -->
+<div id="level1" class="screen active">
+  <h1>[TRACEBACK CTF] :: LEVEL 01 :: MATH ENGINE v0.3.1</h1>
+  <div class="terminal">
+    <div class="noise">// kernel: 5.15.0-traceback-amd64 #1 SMP PREEMPT<br>// uid=1337(ctf) gid=1337(ctf)<br>// WARNING: unauthorized access is monitored</div>
+    <br>
+    <div class="score">SCORE: <span id="score">0</span> / 40 pts</div>
+    <div class="progress-bar"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+    <br>
+    <div class="question" id="question-text">Loading...</div>
+    <div id="hint-area" class="hint-box" style="display:none"></div>
+    <br>
+    <input type="number" id="ans-input" placeholder="answer" />
+    <button onclick="submitAnswer()">SUBMIT</button>
+    <button onclick="getHint()">HINT [-2pts]</button>
+    <div id="msg" style="margin-top:10px;"></div>
+    <br>
+    <div class="noise">// process: 0x7fff... stack canary: 0xdeadbeef // aslr: enabled</div>
+  </div>
+  <div class="hint-box">
+    <span class="yellow">SYSTEM NOTICE:</span> Complete the math engine to unlock next sector.<br>
+    <span class="red">WARNING:</span> Do NOT attempt to inspect memory. Countermeasures active.<br>
+    <span style="color:#222">// flag{n0t_h3r3} // TRACEBACKCTF{wrong_path} // try harder // fake_key_0x00</span>
+  </div>
+</div>
+
+<!-- LEVEL 1 UNLOCK -->
+<div id="level1-unlock" class="screen">
+  <h1>[TRACEBACK CTF] :: SECTOR UNLOCKED</h1>
+  <div class="terminal">
+    <div class="noise">// score threshold reached: ACCESS GRANTED<br>// decrypting next sector...</div>
+    <br>
+    <p class="cyan">Math engine cleared. A new path has opened.</p>
+    <br>
+    <div class="hint-box">
+      <span class="yellow">HINT FRAGMENT [1/3]:</span> The next sector requires a specific URL path.<br>
+      <span class="red">CLUE:</span> The suffix is <span class="cyan" style="font-size:1.2em;letter-spacing:3px">_rl</span><br>
+      <br>
+      <span style="color:#555">// example: /example.com — think about what comes BEFORE _rl</span><br>
+      <span style="color:#555">// what command-line tool fetches URLs? it starts with cu...</span>
+    </div>
+    <br>
+    <p>Enter the correct URL path to proceed:</p>
+    <input type="text" id="url-input" placeholder="/????_rl" style="width:200px" />
+    <button onclick="navigate()">NAVIGATE</button>
+    <div id="url-msg" style="margin-top:8px;"></div>
+    <br>
+    <div class="noise">// fake paths: /root_rl /ctrl_rl /null_rl /exec_rl /perl_rl /url_rl /curl_rl</div>
+  </div>
+</div>
+
+<!-- LEVEL 2 -->
+<div id="level2" class="screen">
+  <h1>[TRACEBACK CTF] :: LEVEL 02 :: NETWORK RECON</h1>
+  <div class="terminal">
+    <div class="noise">// nmap 7.94 — Initiating recon module...<br>// Target: [REDACTED] — IP hidden in session data</div>
+    <br>
+    <p class="cyan">An IP address is hidden in your session cookies.</p>
+    <p style="color:#888;font-size:0.85em">Check: DevTools → Application → Cookies → <b>session_data</b> (decode it)</p>
+    <br>
+    <div class="hint-box">
+      <span class="yellow">RECON TASK:</span> Run the following against the target:<br>
+      <span class="cyan" style="font-size:1.1em">nmap -A &lt;IP&gt;</span><br>
+      <span style="color:#555">// The cookie value is base64 encoded. Decode it to find the IP.</span>
+    </div>
+    <br>
+    <p>Enter the IP address you found:</p>
+    <input type="text" id="ip-input" placeholder="xxx.xxx.xxx.xxx" style="width:180px" />
+    <button onclick="runScan()">RUN NMAP -A</button>
+    <div id="ip-msg" style="margin-top:8px;"></div>
+    <br>
+    <div id="scan-container" style="display:none">
+      <div class="hint-box">
+        <span class="yellow">SCANNING...</span> This may take up to 5 minutes in real ops.<br>
+        <div class="progress-bar"><div class="progress-fill" id="scan-prog" style="width:0%"></div></div>
+        <span id="scan-pct">0%</span>
+      </div>
+      <div class="terminal" style="margin-top:10px;max-height:300px;overflow-y:auto">
+        <pre id="scan-output"></pre>
+      </div>
+      <div id="scan-flag-area" style="display:none;margin-top:15px;">
+        <p class="yellow">SCAN COMPLETE. Anomaly detected on port 31337:</p>
+        <div class="hint-box">
+          <span class="red">X-Secret-Data:</span> <span class="cyan" id="encoded-key-display"></span>
+        </div>
+        <p>Decode the above and enter the original value:</p>
+        <input type="text" id="decode-input" placeholder="enter decoded value" style="width:320px" />
+        <button onclick="verifyKey()">SUBMIT</button>
+        <div id="decode-msg" style="margin-top:8px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEVEL 3 -->
+<div id="level3" class="screen">
+  <h1>[TRACEBACK CTF] :: LEVEL 03 :: HTTP INTERCEPT</h1>
+  <div class="terminal">
+    <div class="noise">// burpsuite community edition v2023.10<br>// proxy: 127.0.0.1:8080 — intercept: ON<br>// target: http://localhost:3000/api/flag</div>
+    <br>
+    <p class="cyan">The flag endpoint only responds to POST requests.</p>
+    <p style="color:#888;font-size:0.85em">Use Burp Suite — intercept the request and change GET → POST</p>
+    <br>
+    <div class="hint-box">
+      <span class="yellow">INTERCEPTED REQUEST:</span><br>
+      <span class="cyan">GET /api/flag HTTP/1.1</span><br>
+      <span style="color:#555">Host: localhost:3000</span><br>
+      <span style="color:#555">User-Agent: Mozilla/5.0</span><br>
+      <span style="color:#555">Cookie: <span id="l3-session"></span></span><br>
+      <br>
+      <span class="red">SERVER RESPONSE (GET):</span><br>
+      <span style="color:#888">HTTP/1.1 405 Method Not Allowed</span><br>
+      <span style="color:#888">{"error":"method not allowed","hint":"try another method"}</span>
+    </div>
+    <div class="hint-box" style="border-color:#ff0000">
+      <span class="red">CONFUSION LAYER:</span><br>
+      <span style="color:#555">// maybe try PUT? // or PATCH? // or OPTIONS? // or DELETE?</span><br>
+      <span style="color:#555">// X-HTTP-Method-Override: POST // maybe that works?</span><br>
+      <span style="color:#333">// TRACEBACKCTF{f4k3_fl4g_d0nt_tr1ck_y0u} // nope</span>
+    </div>
+    <br>
+    <p>Enter the HTTP method you used:</p>
+    <input type="text" id="method-input" placeholder="HTTP METHOD" style="width:200px" />
+    <button onclick="sendRequest()">SEND REQUEST</button>
+    <div id="method-msg" style="margin-top:8px;"></div>
+    <div id="final-flag-area" style="display:none;margin-top:15px;">
+      <div class="terminal">
+        <p class="yellow blink">>>> FLAG CAPTURED <<<</p>
+        <br>
+        <div class="flag-display" id="final-flag"></div>
+        <br>
+        <p style="color:#888">Congratulations. You have completed TracebackCTF.</p>
+        <p style="color:#555;font-size:0.8em">// session terminated // logs purged // trace complete</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── helpers ──────────────────────────────────────────────────────────────────
+const api = (url, body) => fetch(url, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(body)
+}).then(r => r.json());
+
+function setMsg(id, text, ok) {
+  const el = document.getElementById(id);
+  el.textContent = text;
+  el.className = ok ? 'ok' : 'err';
+}
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+// ── LEVEL 1 ──────────────────────────────────────────────────────────────────
+let hintUsed = false;
+
+async function loadQuestion() {
+  const data = await fetch('/api/question').then(r => r.json());
+  document.getElementById('question-text').textContent = data.question;
+  document.getElementById('score').textContent = data.score;
+  document.getElementById('prog').style.width = Math.min(100, (data.score / 40) * 100) + '%';
+  document.getElementById('hint-area').style.display = 'none';
+  document.getElementById('ans-input').value = '';
+  document.getElementById('msg').textContent = '';
+  hintUsed = false;
+}
+
+async function submitAnswer() {
+  const answer = document.getElementById('ans-input').value;
+  const data = await api('/api/answer', { answer, hintUsed });
+  setMsg('msg', data.message, data.correct);
+  if (data.correct) {
+    document.getElementById('score').textContent = data.score;
+    document.getElementById('prog').style.width = Math.min(100, (data.score / 40) * 100) + '%';
+    if (data.unlocked) {
+      setTimeout(() => show('level1-unlock'), 800);
+    } else {
+      setTimeout(loadQuestion, 800);
+    }
+  }
+}
+
+async function getHint() {
+  const data = await api('/api/hint', {});
+  if (data.error) { setMsg('msg', data.error, false); return; }
+  document.getElementById('hint-area').style.display = 'block';
+  document.getElementById('hint-area').textContent = '// HINT: ' + data.hint;
+  document.getElementById('score').textContent = data.score;
+  document.getElementById('prog').style.width = Math.min(100, (data.score / 40) * 100) + '%';
+  hintUsed = true;
+}
+
+document.addEventListener('DOMContentLoaded', loadQuestion);
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('level1').classList.contains('active')) submitAnswer();
+    if (document.getElementById('level1-unlock').classList.contains('active')) navigate();
+    if (document.getElementById('level2').classList.contains('active')) {
+      if (document.getElementById('scan-flag-area').style.display !== 'none') verifyKey();
+      else runScan();
+    }
+    if (document.getElementById('level3').classList.contains('active')) sendRequest();
+  }
+});
+
+// ── LEVEL 1 URL ───────────────────────────────────────────────────────────────
+async function navigate() {
+  const path = document.getElementById('url-input').value.trim();
+  const data = await api('/api/navigate', { path });
+  if (data.success) {
+    show('level2');
+    document.getElementById('l3-session').textContent = document.cookie;
+  } else {
+    setMsg('url-msg', data.message || data.error, false);
+  }
+}
+
+// ── LEVEL 2 SCAN ─────────────────────────────────────────────────────────────
+const scanLines = ip => [
+  'Starting Nmap 7.94 ( https://nmap.org ) at 2026-03-14 03:12 UTC',
+  'NSE: Loaded 156 scripts for scanning.',
+  'Initiating Ping Scan at 03:12',
+  `Scanning ${ip} [4 ports]`,
+  'Completed Ping Scan at 03:12, 0.04s elapsed',
+  'Initiating SYN Stealth Scan at 03:12',
+  `Scanning traceback.ctf (${ip}) [1000 ports]`,
+  `Discovered open port 22/tcp on ${ip}`,
+  `Discovered open port 80/tcp on ${ip}`,
+  `Discovered open port 443/tcp on ${ip}`,
+  `Discovered open port 8080/tcp on ${ip}`,
+  `Discovered open port 31337/tcp on ${ip}`,
+  'Completed SYN Stealth Scan at 03:13, 12.34s elapsed',
+  'Initiating Service scan at 03:13',
+  'Completed Service scan at 03:14, 11.23s elapsed',
+  `Nmap scan report for traceback.ctf (${ip})`,
+  'Host is up (0.0023s latency).',
+  '',
+  'PORT      STATE SERVICE    VERSION',
+  '22/tcp    open  ssh        OpenSSH 8.9p1 Ubuntu',
+  '80/tcp    open  http       Apache httpd 2.4.51',
+  '443/tcp   open  ssl/https  nginx 1.21.6',
+  '8080/tcp  open  http-proxy Squid 5.2',
+  '31337/tcp open  unknown',
+  '| fingerprint-strings:',
+  '|   GetRequest: HTTP/1.0 200 OK',
+  '|   Content-Type: text/plain',
+  '|   X-Secret-Data: [see anomaly below]',
+  '',
+  'OS details: Linux 5.15 - 5.19 (Ubuntu 22.04)',
+  'Nmap done: 1 IP address (1 host up) scanned in 298.41 seconds',
+];
+
+async function runScan() {
+  const ip = document.getElementById('ip-input').value.trim();
+  const data = await api('/api/scan', { ip });
+  if (!data.success) { setMsg('ip-msg', data.message || data.error, false); return; }
+
+  setMsg('ip-msg', '', true);
+  document.getElementById('scan-container').style.display = 'block';
+  document.getElementById('scan-flag-area').style.display = 'none';
+  document.getElementById('scan-output').textContent = '';
+  document.getElementById('encoded-key-display').textContent = data.encodedKey;
+
+  const lines = scanLines(ip);
+  let i = 0, pct = 0;
+  const total = 12000;
+  const progInt = setInterval(() => {
+    pct = Math.min(100, pct + 1);
+    document.getElementById('scan-prog').style.width = pct + '%';
+    document.getElementById('scan-pct').textContent = pct + '%';
+    if (pct >= 100) clearInterval(progInt);
+  }, total / 100);
+
+  (function print() {
+    if (i < lines.length) {
+      document.getElementById('scan-output').textContent += lines[i++] + '\n';
+      setTimeout(print, total / lines.length);
+    } else {
+      document.getElementById('scan-flag-area').style.display = 'block';
+    }
+  })();
+}
+
+async function verifyKey() {
+  const key = document.getElementById('decode-input').value.trim();
+  const data = await api('/api/verify-key', { key });
+  if (data.success) {
+    show('level3');
+  } else {
+    setMsg('decode-msg', data.message || data.error, false);
+  }
+}
+
+// ── LEVEL 3 ───────────────────────────────────────────────────────────────────
+async function sendRequest() {
+  const method = document.getElementById('method-input').value.trim().toUpperCase();
+  const fakeResponses = {
+    'PUT':     'HTTP/1.1 403 Forbidden — {"error":"not allowed"}',
+    'PATCH':   'HTTP/1.1 400 Bad Request — {"error":"invalid method"}',
+    'DELETE':  'HTTP/1.1 403 Forbidden — {"error":"dangerous method blocked"}',
+    'OPTIONS': 'HTTP/1.1 200 OK — Allow: POST',
+    'HEAD':    'HTTP/1.1 405 Method Not Allowed',
+    'GET':     'HTTP/1.1 405 Method Not Allowed — {"error":"method not allowed"}',
+    'TRACE':   'HTTP/1.1 403 Forbidden — TRACE disabled',
+  };
+
+  if (method !== 'POST') {
+    setMsg('method-msg', fakeResponses[method] || 'No response from server.', false);
+    return;
+  }
+
+  // Actually call the real POST /api/flag endpoint
+  const data = await fetch('/api/flag', { method: 'POST', headers: { 'Content-Type': 'application/json' } }).then(r => r.json());
+  if (data.flag) {
+    document.getElementById('method-msg').textContent = '';
+    document.getElementById('final-flag-area').style.display = 'block';
+    document.getElementById('final-flag').textContent = data.flag;
+  } else {
+    setMsg('method-msg', data.error || 'Access denied.', false);
+  }
+}
+
+// ── ANTI-DEVTOOLS ─────────────────────────────────────────────────────────────
+(function() {
+  const fakes = ['TRACEBACKCTF{n0t_th1s_0ne}','TRACEBACKCTF{k33p_l00k1ng}','flag{wrong_path}'];
+  const _log = console.log;
+  console.log = function() { _log('[TRACEBACK MONITOR] Access logged.', fakes[Math.random()*3|0]); };
+  console.warn = console.error = console.log;
+  setInterval(() => {
+    if (window.outerWidth - window.innerWidth > 160 || window.outerHeight - window.innerHeight > 160) {
+      document.body.insertAdjacentHTML('beforeend',
+        '<div style="position:fixed;top:0;left:0;width:100%;background:#f00;color:#fff;padding:10px;z-index:9999;font-family:monospace;text-align:center">⚠ SECURITY ALERT: Inspection detected. Incident logged. ⚠</div>');
+    }
+  }, 1000);
+})();
+</script>
+</body>
+</html>

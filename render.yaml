@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: traceback-ctf
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: CTF_FLAG
+        value: TRACEBACKCTF{trace_your_steps}
+      - key: HIDDEN_IP
+        value: 192.168.47.13
+      - key: LEVEL2_KEY
+        value: "LEVEL2_KEY=traceback_recon_complete"
